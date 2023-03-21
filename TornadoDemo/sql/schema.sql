@@ -1,0 +1,16 @@
+CREATE DATABASE IF NOT EXISTS test;
+
+USE test;
+
+-- DROP TABLE IF EXISTS VideoStorage;
+
+CREATE TABLE IF NOT EXISTS Financial(
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    symbol VARCHAR(255) NOT NULL,
+    `date` VARCHAR(16) NOT NULL,
+    open_price VARCHAR(255) NOT NULL,
+    close_price VARCHAR(255) NOT NULL,
+    volume VARCHAR(255) NOT NULL,
+    UNIQUE(symbol, `date`)
+);
+

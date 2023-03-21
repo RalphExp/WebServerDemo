@@ -1,0 +1,25 @@
+version: "3.3"
+
+services:
+  pyweb:
+    build: .
+    command: python3 server.py
+    ports:
+      - 8080:8080
+    depends_on: 
+      - db
+    links: 
+      - db
+    restart: always
+    environment:
+       env: 'prod'
+
+  db:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: 'test'
+      MYSQL_ROOT_PASSWORD: 'root'
+    restart: always
+
