@@ -1,0 +1,27 @@
+<html>
+    <style>
+        .c {
+            background-color: aquamarine;
+        }
+    </style>
+    <body>
+        <button id="btn">click me</button>
+        <iframe class="c"></iframe>
+    </body>
+    <script>
+        let btn = document.querySelector('#btn')
+        console.log(btn)
+
+        let frm = document.querySelector('iframe')
+
+        setTimeout(function() {
+            frm.src = "embedded"
+        }, 3000)
+
+        btn.addEventListener('click', function(e) {
+            console.log("global " + e.view.performance.timeOrigin)
+            console.log("global " + e.timeStamp)
+        })
+        
+    </script>
+</html>
