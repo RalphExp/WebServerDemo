@@ -32,6 +32,7 @@ def sqlConn(func):
                 conn.close()
     return __sqlFunc
 
+# XXX: this is just a demo, don't use raw string in SQL !!!
 
 @sqlConn
 def getFinancialData(symbol, startDate, endDate, page, limit, **kwargs):

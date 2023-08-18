@@ -1,0 +1,1 @@
+JWT_SECRET=eUbP9shywUygMx7u MONGO_URI="mongodb://localhost:27017/" MONGO_DATABASE=test go run main.go
