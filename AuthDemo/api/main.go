@@ -6,7 +6,6 @@
 //  Host: localhost:8080
 //	BasePath: /
 //	Version: 1.0.0
-//	Contact: Mohamed Labouardy <mohamed@labouardy.com> https://labouardy.com
 //
 //	Consumes:
 //	- application/json
