@@ -1,5 +1,3 @@
-# Take-Home Assignment
-
 ## How to run the demo
 ``` sudo docker-compose up -d  ```
 
