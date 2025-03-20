@@ -6,7 +6,7 @@ var hdButton = document.querySelector("button#hd");
 // Video element in the HTML5 page
 var video = document.querySelector("video");
 // The local MediaStream to play with
-var stream;
+// var stream;
 // Look after different browser vendors' ways of calling the
 // getUserMedia() API method:
 navigator.getUserMedia = navigator.getUserMedia ||
@@ -17,7 +17,7 @@ function successCallback(gotStream) {
     window.stream = gotStream;
     // Attach the returned stream to the <video> element
     // in the HTML page
-    video.srcObject = stream
+    video.srcObject = gotStream;
     // Start playing video
     video.play();
     // Callback to be called in case of failure...
@@ -65,9 +65,11 @@ function errorCallback(error){
 // Simple wrapper for getUserMedia() with constraints object as
 // an input parameter
 function getMedia(constraints) {
-    if (!!stream) {
+    if (window.stream) {
         video.src = null;
-        stream.stop();
+        window.stream.getTracks().forEach(track => {
+            track.stop();
+        });
     }
     navigator.getUserMedia(constraints, successCallback, errorCallback);
 }
