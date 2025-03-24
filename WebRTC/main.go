@@ -19,7 +19,8 @@ func main() {
 	group.GET("/:path", handleWebRTC)
 
 	router.GET("/", handleRoot)
-	router.Static("/js", "./static/js")
+	router.Static("/js", "./js")
+	router.Static("/socket.io", "./socket.io")
 
 	router.Run(":8000")
 }
