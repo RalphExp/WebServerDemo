@@ -27,23 +27,24 @@ io.on('connection', function (socket) {
         socket.broadcast.to(message.channel).emit('message', message.message);
     });
     // Handle 'create or join' messages
-    socket.on('create or join', function (channel) {
-        io.sockets.in(channel).fetchSockets()
+    socket.on('create or join', function (room) {
+        io.sockets.in(room).fetchSockets()
             .then(sockets => {
                 var numClients = sockets.length;
                 console.log('numclients = ' + numClients);
+                log('S --> Room ' + room + ' has ' + numClients + ' client(s)');
+                log('S --> Request to create or join room', room);
+                // First client joining...
                 if (numClients == 0) {
-                    socket.join(channel);
-                    socket.emit('created', channel);
+                    socket.join(room);
+                    socket.emit('created', room);
                 } else if (numClients == 1) {
-                    // server get 'create or join'
-                    // then broadcast the message, so the initiator will receive this message
-                    io.sockets.in(channel).emit('remotePeerJoining', channel);
-                    socket.join(channel);
-                    socket.broadcast.to(channel).emit('broadcast: joined', 'S --> broadcast(): client ' + socket.id + ' joined channel ' + channel);
-                } else {
-                    console.log("Channel full!");
-                    socket.emit('full', channel);
+                    // Second client joining...
+                    io.sockets.in(room).emit('join', room);
+                    socket.join(room);
+                    socket.emit('joined', room);
+                } else { // max two clients
+                    socket.emit('full', room);
                 }
             })
             .catch(error => {
