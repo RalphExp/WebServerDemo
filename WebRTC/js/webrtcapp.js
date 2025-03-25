@@ -288,6 +288,9 @@ function doAnswer() {
 // and createAnswer()
 function setLocalAndSendMessage(sessionDescription) {
     pc.setLocalDescription(sessionDescription);
+    console.log('[setLocalAndSendMessage], desc=', sessionDescription)
+
+    // this is a description message: type = offer|answer
     sendMessage(sessionDescription);
 }
 // Remote stream handlers...
