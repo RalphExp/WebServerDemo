@@ -65,6 +65,7 @@ if (room !== '') {
 }
 // Set getUserMedia constraints
 var constraints = { video: true, audio: true };
+
 // From this point on, execution proceeds based on asynchronous events...
 // getUserMedia() handlers...
 function handleUserMedia(stream) {
@@ -74,6 +75,15 @@ function handleUserMedia(stream) {
     console.log('Adding local stream.');
     sendMessage('got user media');
 }
+
+function trace(msg) {
+    console.log('[trace]:', msg)
+}
+
+function onSignalingError(error) {
+    console.log('Failed to create signaling message : ' + error.name);
+}
+
 function handleUserMediaError(error) {
     console.log('navigator.getUserMedia error: ', error);
 }
@@ -82,41 +92,46 @@ function handleUserMediaError(error) {
 // Handle 'created' message coming back from server:
 // this peer is the initiator
 socket.on('created', function (room) {
-    console.log('Created room ' + room);
+    console.log('[created] room ' + room);
     isInitiator = true;
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
     console.log('Getting user media with constraints', constraints);
     checkAndStart();
 });
+
 // Handle 'full' message coming back from server:
 // this peer arrived too late :-(
 socket.on('full', function (room) {
     console.log('Room ' + room + ' is full');
 });
+
 // Handle 'join' message coming back from server:
 // another peer is joining the channel
 socket.on('join', function (room) {
-    console.log('Another peer made a request to join room ' + room);
+    console.log('[join] Another peer made a request to join room ' + room);
     console.log('This peer is the initiator of room ' + room + '!');
     isChannelReady = true;
 });
+
 // Handle 'joined' message coming back from server:
 // this is the second peer joining the channel
 socket.on('joined', function (room) {
-    console.log('This peer has joined room ' + room);
+    console.log('[joined] room ' + room);
     isChannelReady = true;
     // Call getUserMedia()
     navigator.getUserMedia(constraints, handleUserMedia, handleUserMediaError);
     console.log('Getting user media with constraints', constraints);
 });
+
 // Server-sent log message...
 socket.on('log', function (array) {
     console.log.apply(console, array);
 });
+
 // Receive message from the other peer via the signaling server
 socket.on('message', function (message) {
-    console.log('Received message:', message);
+    console.log('[message]', message);
     if (message === 'got user media') {
         checkAndStart();
     } else if (message.type === 'offer') {
@@ -141,14 +156,20 @@ socket.on('message', function (message) {
 // Send message to the other peer via the signaling server
 function sendMessage(message) {
     console.log('Sending message: ', message);
-    socket.emit('message', message);
+    socket.emit('message', {
+        channel: room,
+        message: message,
+    });
 }
 // Channel negotiation trigger function
 function checkAndStart() {
+    console.log('checking:', isStarted, localStream, isChannelReady)
     if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
+        console.log('creating peer connection')
         createPeerConnection();
         isStarted = true;
         if (isInitiator) {
+            console.log('start to call')
             doCall();
         }
     }
@@ -273,7 +294,7 @@ function setLocalAndSendMessage(sessionDescription) {
 function handleRemoteStreamAdded(event) {
     console.log('Remote stream added.');
     // attachMediaStream(remoteVideo, event.stream);
-    remoteVideo.srcObject = stream;
+    remoteVideo.srcObject = event.stream;
     console.log('Remote stream attached!!.');
     remoteStream = event.stream;
 }

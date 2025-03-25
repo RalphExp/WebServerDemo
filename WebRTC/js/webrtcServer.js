@@ -22,29 +22,30 @@ const io = require('socket.io')(server, {
 // Let's start managing connections...
 io.on('connection', function (socket) {
     // Handle 'message' messages
-    socket.on('message', function (message) {
-        log('S --> Got message: ', message);
-        socket.broadcast.to(message.channel).emit('message', message.message);
+    socket.on('message', function (msg) {
+        log('S --> Got message: ', msg.message);
+        console.log('[message]', msg);
+        socket.broadcast.to(msg.channel).emit('message', msg.message);
     });
     // Handle 'create or join' messages
-    socket.on('create or join', function (room) {
-        io.sockets.in(room).fetchSockets()
+    socket.on('create or join', function (channel) {
+        io.sockets.in(channel).fetchSockets()
             .then(sockets => {
                 var numClients = sockets.length;
                 console.log('numclients = ' + numClients);
-                log('S --> Room ' + room + ' has ' + numClients + ' client(s)');
-                log('S --> Request to create or join room', room);
+                log('S --> Room ' + channel + ' has ' + numClients + ' client(s)');
+                log('S --> Request to create or join room', channel);
                 // First client joining...
                 if (numClients == 0) {
-                    socket.join(room);
-                    socket.emit('created', room);
+                    socket.join(channel);
+                    socket.emit('created', channel);
                 } else if (numClients == 1) {
                     // Second client joining...
-                    io.sockets.in(room).emit('join', room);
-                    socket.join(room);
-                    socket.emit('joined', room);
+                    io.sockets.in(channel).emit('join', channel);
+                    socket.join(channel);
+                    socket.emit('joined', channel);
                 } else { // max two clients
-                    socket.emit('full', room);
+                    socket.emit('full', channel);
                 }
             })
             .catch(error => {
@@ -56,8 +57,7 @@ io.on('connection', function (socket) {
     socket.on('response', function (response) {
         log('S --> Got response: ', response);
         // Just forward message to the other peer
-        socket.broadcast.to(response.channel).emit('response',
-            response.message);
+        socket.broadcast.to(response).emit('response', response);
     });
     // Handle 'Bye' messages
     socket.on('Bye', function (channel) {

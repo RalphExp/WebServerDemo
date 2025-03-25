@@ -24,7 +24,7 @@ io.on('connection', function (socket) {
     // Handle 'message' messages
     socket.on('message', function (message) {
         log('S --> Got message: ', message);
-        socket.broadcast.to(message.channel).emit('message', message.message);
+        socket.broadcast.to(message.channel).emit('message', message);
     });
     // Handle 'create or join' messages
     socket.on('create or join', function (channel) {
