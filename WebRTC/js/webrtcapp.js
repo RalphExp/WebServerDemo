@@ -4,6 +4,7 @@
 // Opera --> getUserMedia
 // Chrome --> webkitGetUserMedia
 // Firefox --> mozGetUserMedia
+
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 // Clean-up function:
@@ -57,7 +58,7 @@ var sdpConstraints = {};
 // Let's get started: prompt user for input (room name)
 var room = prompt('Enter room name:');
 // Connect to signaling server
-var socket = io.connect("http://localhost:8181");
+var socket = io.connect("https://192.168.104.186:8181", { secure: true });
 // Send 'Create or join' message to singnaling server
 if (room !== '') {
     console.log('Create or join room', room);
@@ -320,3 +321,4 @@ function stop() {
     pc = null;
     sendButton.disabled = true;
 }
+

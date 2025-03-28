@@ -1,11 +1,18 @@
 var static = require('node-static');
-var http = require('http');
+var https = require('https');
+var fs = require('fs')
+
 // Create a node-static server instance listening on port 8181
 var file = new (static.Server)();
 
+const options = {
+  key: fs.readFileSync('../key.pem'),
+  cert: fs.readFileSync('../cert.pem')
+};
+
 // We use the http module’s createServer function and
 // use our instance of node-static to serve the files
-const server = http.createServer(function (req, res) {
+const server = https.createServer(options, function (req, res) {
     file.serve(req, res);
 })
 
@@ -21,6 +28,7 @@ const io = require('socket.io')(server, {
 
 // Let's start managing connections...
 io.on('connection', function (socket) {
+    console.log('accepted new client:')
     // Handle 'message' messages
     socket.on('message', function (msg) {
         log('S --> Got message: ', msg.message);

@@ -22,5 +22,6 @@ func main() {
 	router.Static("/js", "./js")
 	router.Static("/socket.io", "./socket.io")
 
-	router.Run(":8000")
+	// router.Run(":8000")
+	router.RunTLS(":8000", "cert.pem", "key.pem")
 }
