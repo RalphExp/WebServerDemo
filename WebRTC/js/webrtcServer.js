@@ -90,4 +90,5 @@ io.on('connection', function (socket) {
     }
 });
 
+console.log('listening port:',8181)
 server.listen(8181);

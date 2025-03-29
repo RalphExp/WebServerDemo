@@ -58,7 +58,8 @@ var sdpConstraints = {};
 // Let's get started: prompt user for input (room name)
 var room = prompt('Enter room name:');
 // Connect to signaling server
-var socket = io.connect("https://192.168.104.186:8181", { secure: true });
+var socket = io.connect("https://localhost:8181", { secure: true });
+
 // Send 'Create or join' message to singnaling server
 if (room !== '') {
     console.log('Create or join room', room);
