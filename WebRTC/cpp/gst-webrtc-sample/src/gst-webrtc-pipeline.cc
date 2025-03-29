@@ -50,7 +50,6 @@ void WebRTCPipeline::startPipeline(std::string& bin)
     g_array_unref(transceivers);
   }
 
-  // 接続するためのネゴシエーションを行うためのコールバックを設定
   mNegotiationNeededHandleId = g_signal_connect(mWebRTCBin, "on-negotiation-needed", 
       G_CALLBACK(WebRTCPipeline::onNegotiationNeeded), this);
   mSendIceCandidateHandleId = g_signal_connect(mWebRTCBin, "on-ice-candidate", 
@@ -60,15 +59,12 @@ void WebRTCPipeline::startPipeline(std::string& bin)
 
   gst_element_set_state(mPipeline, GST_STATE_READY);
 
-  // 映像受信用のコールバック
   mIncomingStreamHandleId = g_signal_connect(mWebRTCBin, "pad-added", 
       G_CALLBACK(WebRTCPipeline::onIncomingStream), this);
 
-  // 受信用データチャンネルのコールバック
   mDataChannelHandleId = g_signal_connect(mWebRTCBin, "on-data-channel", 
       G_CALLBACK(WebRTCPipeline::onDataChannel), this);
 
-  // 送信用データチャンネルを作成
   std::string name("send-channel");
   mSendDataChannel = new WebRTCDataChannel(mWebRTCBin);
   mSendDataChannel->setListener(this);
@@ -171,8 +167,6 @@ void WebRTCPipeline::onIceReceived(guint mlineIndex, const gchar *candidateStrin
   g_signal_emit_by_name(mWebRTCBin, "add-ice-candidate", mlineIndex, candidateString);
 }
 
-// private functions.
-
 void WebRTCPipeline::onAnswerReceived(GstSDPMessage *sdp)
 {
   GstWebRTCSessionDescription *answer = gst_webrtc_session_description_new(GST_WEBRTC_SDP_TYPE_ANSWER, sdp);
@@ -233,8 +227,6 @@ void WebRTCPipeline::createReceiveDataChannel(GstWebRTCDataChannel *dataChannel)
   }
 }
 
-// callback static functions.
-
 void WebRTCPipeline::onNegotiationNeeded(GstElement *webrtcbin, gpointer userData)
 {
   WebRTCPipeline *pipeline = (WebRTCPipeline *) userData;
@@ -244,7 +236,6 @@ void WebRTCPipeline::onNegotiationNeeded(GstElement *webrtcbin, gpointer userDat
   }
 }
 
-// offer が作成された場合
 void WebRTCPipeline::onOfferCreated(GstPromise *promise, gpointer userData)
 {
   WebRTCPipeline *pipeline = (WebRTCPipeline *) userData;
@@ -315,26 +306,20 @@ void WebRTCPipeline::onIceGatheringStateNotify(GstElement *webrtcbin, GParamSpec
   g_print("ICE gathering state changed to %s.\n", new_state);
 }
 
-// 新規ストリームの追加
 void WebRTCPipeline::onIncomingStream(GstElement *webrtcbin, GstPad *pad, gpointer userData)
 {
   WebRTCPipeline *pipeline = (WebRTCPipeline *) userData;
   pipeline->addStream(pad);
 }
 
-// 新規データチャンネルの接続
 void WebRTCPipeline::onDataChannel(GstElement *webrtcbin, GObject *dataChannel, gpointer userData)
 {
   WebRTCPipeline *pipeline = (WebRTCPipeline *) userData;
   pipeline->createReceiveDataChannel((GstWebRTCDataChannel *)dataChannel);
 }
 
-// WebRTCDataChannelListener implements.
-
 void WebRTCPipeline::onConnected(WebRTCDataChannel *channel)
 {
-  // MEMO データチャンネルが接続されたときに呼びだれます。
-
   if (mListener) {
     mListener->onDataChannelConnected(this);
   }
@@ -342,8 +327,6 @@ void WebRTCPipeline::onConnected(WebRTCDataChannel *channel)
 
 void WebRTCPipeline::onDisconnected(WebRTCDataChannel *channel)
 {
-  // MEMO データチャンネルが切断されたときに呼びだれます。
-  
   if (mListener) {
     mListener->onDataChannelDisconnected(this);
   }
@@ -351,8 +334,6 @@ void WebRTCPipeline::onDisconnected(WebRTCDataChannel *channel)
 
 void WebRTCPipeline::onMessage(WebRTCDataChannel *channel, std::string& message)
 {
-  // MEMO データチャンネルにメッセージ送られてきた時に呼び出されます。
-
   if (mListener) {
     mListener->onDataChannel(this, message);
   }

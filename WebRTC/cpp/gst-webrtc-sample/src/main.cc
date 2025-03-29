@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
   gst_init(&argc, &argv);
 
-  std::string url = "ws://localhost:9449/";
+  std::string url = "wss://localhost:9449/";
   std::string origin = "localhost";
 
   WebRTCMain main;

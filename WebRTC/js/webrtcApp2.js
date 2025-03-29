@@ -122,9 +122,9 @@ socket.addEventListener('message', async function (message) {
             doAnswer();
         } else if (message.type === 'answer' && isStarted) {
             pc.setRemoteDescription(new RTCSessionDescription(message));
-        } else if (message.type === 'candidate' && isStarted) {
+        } else if (message.type === 'ice' && isStarted) {
             var candidate = new RTCIceCandidate({
-                sdpMLineIndex: message.label,
+                sdpMLineIndex: message.sdpMLineIndex,
                 candidate: message.candidate
             });
             pc.addIceCandidate(candidate);
@@ -241,8 +241,8 @@ function handleIceCandidate(event) {
     console.log('handleIceCandidate event: ', event);
     if (event.candidate) {
         sendMessage({
-            type: 'candidate',
-            label: event.candidate.sdpMLineIndex,
+            type: 'ice',
+            sdpMLineIndex: event.candidate.sdpMLineIndex,
             id: event.candidate.sdpMid,
             candidate: event.candidate.candidate
         });

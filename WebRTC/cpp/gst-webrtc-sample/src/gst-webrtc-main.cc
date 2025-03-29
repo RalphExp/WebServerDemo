@@ -46,8 +46,6 @@ void WebRTCMain::startPipeline(bool master)
 {
   stopPipeline();
 
-  // webrtcbin エレメント名前は固定にしておく必要があります
-  // webrtcbin name=webrtcbin を変更する場合には、呼び出している箇所も全て変更する必要があります。
   std::string bin = "webrtcbin name=webrtcbin bundle-policy=max-bundle latency=100 stun-server=stun://stun.l.google.com:19302 \
         videotestsrc is-live=true \
          ! videoconvert \
@@ -79,34 +77,6 @@ void WebRTCMain::stopPipeline()
   }
 }
 
-/**
- * Websocket で送られてきた ICE or SDP の情報を webrtcbin に渡します。
- * 
- * ICE 情報が格納された JSON オブジェクトのフォーマットは下記の通りです。
- * <pre>
- * {
- *   "type": "ice",
- *   "data": {
- *     "candidate": ...,
- *     "sdpMLineIndex": ...,
- *      ...
- *   }
- * }
- * </pre>
- * 
- * SDP 情報が格納された JSON オブジェクトのフォーマットは下記の通りです。
- * <pre>
- * {
- *   "type": "sdp",  
- *   "data": {
- *     "type": "answer",
- *     "sdp": "o=- [....]"
- *   }
- * }
- * </pre>
-
- * @param data_json_object ICE or SDP 情報が格納された JSON オブジェクト
- */
 void WebRTCMain::parseSdpAndIce(std::string& message)
 {
   const gchar *text = message.c_str();
@@ -132,18 +102,20 @@ void WebRTCMain::parseSdpAndIce(std::string& message)
   }
   const gchar *type_string = json_object_get_string_member(root_json_object, "type");
 
-  if (!json_object_has_member(root_json_object, "data")) {
-    g_error("Received message without data field.\n\n");
-    g_object_unref(G_OBJECT(json_parser));
-    return;
-  }
+  // if (!json_object_has_member(root_json_object, "data")) {
+  //   g_error("Received message without data field.\n\n");
+  //   g_object_unref(G_OBJECT(json_parser));
+  //   return;
+  // }
 
   // JsonObject *data_json_object = json_object_get_object_member(root_json_object, "data");
 
-  if (g_strcmp0 (type_string, "sdp") == 0) {
-    parseSdp(data_json_object);
+  if (g_strcmp0 (type_string, "offer") == 0) {
+    parseSdp(root_json_object);
+  } else if (g_strcmp0 (type_string, "answer") == 0) {
+    parseSdp(root_json_object);
   } else if (g_strcmp0 (type_string, "ice") == 0) {
-    parseIce(data_json_object);
+    parseIce(root_json_object);
   } else {
     g_print("Received unknown type. %s\n", type_string);
   }
@@ -232,11 +204,11 @@ void WebRTCMain::onSendSdp(WebRTCPipeline *pipeline, gint type, gchar *sdp_strin
 
   json_object_set_string_member(sdp, "sdp", sdp_string);
 
-  JsonObject *sdp_json = json_object_new();
-  json_object_set_string_member(sdp_json, "type", "sdp");
-  json_object_set_object_member(sdp_json, "data", sdp);
+  // JsonObject *sdp_json = json_object_new();
+  // json_object_set_string_member(sdp_json, "type", "sdp");
+  // json_object_set_object_member(sdp_json, "data", sdp);
 
-  gchar *json_string = get_string_from_json_object(sdp_json);
+  gchar *json_string = get_string_from_json_object(sdp);
   if (json_string) {
     if (mClient) {
       std::string message(json_string);
@@ -245,7 +217,8 @@ void WebRTCMain::onSendSdp(WebRTCPipeline *pipeline, gint type, gchar *sdp_strin
     g_free(json_string);
   }
 
-  json_object_unref(sdp_json);
+  // json_object_unref(sdp_json);
+  json_object_unref(sdp);
 }
 
 void WebRTCMain::onSendIceCandidate(WebRTCPipeline *pipeline, guint mlineindex, gchar *candidate)
@@ -272,7 +245,7 @@ void WebRTCMain::onSendIceCandidate(WebRTCPipeline *pipeline, guint mlineindex, 
 
 void WebRTCMain::onAddStream(WebRTCPipeline *pipeline, GstPad *pad)
 {
-  // TODO 相手からの映像・音声のストリームが送られてきた時の処理を行う
+
 }
 
 void WebRTCMain::onDataChannelConnected(WebRTCPipeline *pipeline)
